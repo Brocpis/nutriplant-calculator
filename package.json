@@ -2,6 +2,7 @@
   "name": "nutriplant-calculator-frontend",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://Brocpis.github.io/nutriplant-calculator",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
