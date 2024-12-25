@@ -21,10 +21,8 @@ import {
 
 const { Option } = Select
 
-// Enum for canopy size multipliers
-
 interface FertilizerUsage {
-  fertilizer: string // ใช้ string เพื่อแสดงชื่อภาษาไทย
+  fertilizer: string
   amountPerUse: number
   totalAmountPerArea: number
   totalAmountForTimes: number
@@ -43,6 +41,7 @@ const LeafTab: React.FC = () => {
     CanopySize.SMALL
   )
   const [summary, setSummary] = useState<FertilizerUsage[]>([])
+  const [removedItems, setRemovedItems] = useState<FertilizerUsage[]>([])
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
   const [selectedFertilizerImage, setSelectedFertilizerImage] = useState<
     null | string
@@ -55,13 +54,13 @@ const LeafTab: React.FC = () => {
       if (stageData && selectedFormula) {
         const result = Object.entries(stageData.fertilizers[0]?.type || {}).map(
           ([fertilizerKey, usage]) => {
-            const usageAmount = usage || 0 // จำนวนใช้ต่อครั้ง (ซีซี)
-            const totalAmountPerArea = usageAmount * area * selectedCanopySize // ใช้ทั้งหมดตามจำนวนไร่และทรงพุ่ม
-            const totalAmountForTimes = totalAmountPerArea * times // ใช้ทั้งหมดตามจำนวนครั้ง
-            const litersRequired = Math.ceil(totalAmountForTimes / 1000) // แปลงเป็นลิตร (ปัดขึ้น)
+            const usageAmount = usage || 0
+            const totalAmountPerArea = usageAmount * area * selectedCanopySize
+            const totalAmountForTimes = totalAmountPerArea * times
+            const litersRequired = Math.ceil(totalAmountForTimes / 1000)
             const pricePerUnit =
               FertilizerPrices[fertilizerKey as FertilizerType] || 0
-            const price = litersRequired * pricePerUnit // ราคา = จำนวนลิตร * ราคาต่อลิตร
+            const price = litersRequired * pricePerUnit
             return {
               fertilizer: fertilizerKey,
               amountPerUse: usageAmount,
@@ -75,6 +74,20 @@ const LeafTab: React.FC = () => {
         setSummary(result)
       }
     }
+  }
+
+  const removeRow = (record: FertilizerUsage) => {
+    setRemovedItems((prev) => [...prev, record])
+    setSummary((prev) =>
+      prev.filter((item) => item.fertilizer !== record.fertilizer)
+    )
+  }
+
+  const addRow = (record: FertilizerUsage) => {
+    setRemovedItems((prev) =>
+      prev.filter((item) => item.fertilizer !== record.fertilizer)
+    )
+    setSummary((prev) => [...prev, record])
   }
 
   const showFertilizerImage = (fertilizer: string) => {
@@ -127,6 +140,15 @@ const LeafTab: React.FC = () => {
       title: 'ราคารวม (บาท)',
       dataIndex: 'price',
       key: 'price'
+    },
+    {
+      title: 'จัดการ',
+      key: 'action',
+      render: (_: any, record: FertilizerUsage) => (
+        <Button type="link" danger onClick={() => removeRow(record)}>
+          ลบ
+        </Button>
+      )
     }
   ]
 
@@ -204,26 +226,6 @@ const LeafTab: React.FC = () => {
           </Select>
         </Col>
         <Col span={12}>
-          <InputNumber
-            placeholder="จำนวนไร่"
-            min={1}
-            style={{ width: '100%' }}
-            onChange={(value) => setArea(value || 0)}
-            addonAfter={'ไร่'}
-          />
-        </Col>
-      </Row>
-      <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
-        <Col span={12}>
-          <InputNumber
-            placeholder="จำนวนครั้งที่ให้ปุ๋ย"
-            min={1}
-            style={{ width: '100%' }}
-            onChange={(value) => setTimes(value || 0)}
-            addonAfter={'ครั้ง'}
-          />
-        </Col>
-        <Col span={12}>
           <Select
             placeholder="เลือกขนาดทรงพุ่ม"
             style={{ width: '100%' }}
@@ -234,6 +236,26 @@ const LeafTab: React.FC = () => {
             <Option value={CanopySize.MEDIUM}>พุ่มขนาดกลาง (30ลิตร/ไร่)</Option>
             <Option value={CanopySize.LARGE}>พุ่มขนาดใหญ่ (40ลิตร/ไร่)</Option>
           </Select>
+        </Col>
+      </Row>
+      <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
+        <Col span={12}>
+          <InputNumber
+            placeholder="จำนวนไร่"
+            min={1}
+            style={{ width: '100%' }}
+            onChange={(value) => setArea(value || 0)}
+            addonAfter={'ไร่'}
+          />
+        </Col>
+        <Col span={12}>
+          <InputNumber
+            placeholder="จำนวนครั้งที่ให้ปุ๋ย"
+            min={1}
+            style={{ width: '100%' }}
+            onChange={(value) => setTimes(value || 0)}
+            addonAfter={'ครั้ง'}
+          />
         </Col>
       </Row>
       <Button
@@ -255,7 +277,24 @@ const LeafTab: React.FC = () => {
         <h4>ราคาทั้งหมด: {totalPrice.toLocaleString()} บาท</h4>
       )}
 
-      {/* Modal for displaying fertilizer image */}
+      {removedItems.length > 0 && (
+        <div style={{ marginTop: 16 }}>
+          <h4>ปุ๋ยที่ลบออก:</h4>
+          {removedItems.map((item) => (
+            <div key={item.fertilizer} style={{ marginBottom: 8 }}>
+              <span>{item.fertilizer}</span>
+              <Button
+                type="link"
+                onClick={() => addRow(item)}
+                style={{ marginLeft: 8 }}
+              >
+                เพิ่มกลับ
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
+
       <Modal open={isModalVisible} onCancel={closeModal} footer={null} centered>
         {selectedFertilizerImage && (
           <Image

@@ -20,7 +20,7 @@ import {
 const { Option } = Select
 
 interface FertilizerUsage {
-  fertilizer: string // ใช้ string เพื่อแสดงชื่อภาษาไทย
+  fertilizer: string
   amountPerUse: number
   totalAmountPerArea: number
   totalAmountForTimes: number
@@ -34,6 +34,7 @@ const SoilTab: React.FC = () => {
   const [area, setArea] = useState<number>(0)
   const [times, setTimes] = useState<number>(0)
   const [summary, setSummary] = useState<FertilizerUsage[]>([])
+  const [removedItems, setRemovedItems] = useState<FertilizerUsage[]>([])
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
   const [selectedFertilizerImage, setSelectedFertilizerImage] = useState<
     null | string
@@ -47,13 +48,13 @@ const SoilTab: React.FC = () => {
         const result = stageData.fertilizers
           .map(({ type }) =>
             Object.entries(type || {}).map(([fertilizerKey, usage]) => {
-              const usageAmount = usage || 0 // จำนวนใช้ต่อไร่
-              const totalAmountPerArea = usageAmount * area // ใช้ทั้งหมดตามจำนวนไร่
-              const totalAmountForTimes = totalAmountPerArea * times // ใช้ทั้งหมดตามจำนวนครั้ง
-              const litersRequired = Math.ceil(totalAmountForTimes / 1000) // แปลงเป็นลิตร (ปัดขึ้น)
+              const usageAmount = usage || 0
+              const totalAmountPerArea = usageAmount * area
+              const totalAmountForTimes = totalAmountPerArea * times
+              const litersRequired = Math.ceil(totalAmountForTimes / 1000)
               const pricePerUnit =
                 FertilizerPrices[fertilizerKey as FertilizerType] || 0
-              const price = litersRequired * pricePerUnit // ราคา = จำนวนลิตร * ราคาต่อลิตร
+              const price = litersRequired * pricePerUnit
               return {
                 fertilizer: fertilizerKey,
                 amountPerUse: usageAmount,
@@ -68,6 +69,20 @@ const SoilTab: React.FC = () => {
         setSummary(result)
       }
     }
+  }
+
+  const removeRow = (record: FertilizerUsage) => {
+    setRemovedItems((prev) => [...prev, record])
+    setSummary((prev) =>
+      prev.filter((item) => item.fertilizer !== record.fertilizer)
+    )
+  }
+
+  const addRow = (record: FertilizerUsage) => {
+    setRemovedItems((prev) =>
+      prev.filter((item) => item.fertilizer !== record.fertilizer)
+    )
+    setSummary((prev) => [...prev, record])
   }
 
   const showFertilizerImage = (fertilizer: string) => {
@@ -120,6 +135,15 @@ const SoilTab: React.FC = () => {
       title: 'ราคารวม (บาท)',
       dataIndex: 'price',
       key: 'price'
+    },
+    {
+      title: 'จัดการ',
+      key: 'action',
+      render: (_: any, record: FertilizerUsage) => (
+        <Button type="link" danger onClick={() => removeRow(record)}>
+          ลบ
+        </Button>
+      )
     }
   ]
 
@@ -214,7 +238,24 @@ const SoilTab: React.FC = () => {
         <h4>ราคาทั้งหมด: {totalPrice.toLocaleString()} บาท</h4>
       )}
 
-      {/* Modal for displaying fertilizer image */}
+      {removedItems.length > 0 && (
+        <div style={{ marginTop: 16 }}>
+          <h4>ปุ๋ยที่ลบออก:</h4>
+          {removedItems.map((item) => (
+            <div key={item.fertilizer} style={{ marginBottom: 8 }}>
+              <span>{item.fertilizer}</span>
+              <Button
+                type="link"
+                onClick={() => addRow(item)}
+                style={{ marginLeft: 8 }}
+              >
+                เพิ่มกลับ
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
+
       <Modal open={isModalVisible} onCancel={closeModal} footer={null} centered>
         {selectedFertilizerImage && (
           <Image
