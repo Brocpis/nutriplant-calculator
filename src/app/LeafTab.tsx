@@ -9,6 +9,7 @@ import {
   Modal,
   Image
 } from 'antd'
+import { DeleteOutlined, RollbackOutlined } from '@ant-design/icons'
 import {
   PlantType,
   FertilizerType,
@@ -146,7 +147,7 @@ const LeafTab: React.FC = () => {
       key: 'action',
       render: (_: any, record: FertilizerUsage) => (
         <Button type="link" danger onClick={() => removeRow(record)}>
-          ลบ
+          <DeleteOutlined />
         </Button>
       )
     }
@@ -167,6 +168,7 @@ const LeafTab: React.FC = () => {
               setSelectedStage(null)
               setSelectedFormula(null)
               setSummary([])
+              setRemovedItems([])
             }}
           >
             {Object.keys(PlantStagesGrouped).map((plant) => {
@@ -288,7 +290,7 @@ const LeafTab: React.FC = () => {
                 onClick={() => addRow(item)}
                 style={{ marginLeft: 8 }}
               >
-                เพิ่มกลับ
+                <RollbackOutlined />
               </Button>
             </div>
           ))}
