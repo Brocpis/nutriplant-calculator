@@ -9,7 +9,7 @@ import {
   Modal,
   Image
 } from 'antd'
-import { DeleteOutlined } from '@ant-design/icons'
+import { DeleteOutlined, RollbackOutlined } from '@ant-design/icons'
 import {
   PlantType,
   FertilizerType,
