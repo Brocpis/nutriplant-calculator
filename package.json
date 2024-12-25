@@ -5,6 +5,7 @@
   "homepage": "https://Brocpis.github.io/nutriplant-calculator",
   "scripts": {
     "dev": "next dev --turbopack",
+    "deploy": "gh-pages -d out",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -22,6 +23,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "15.1.2",
+    "gh-pages": "^6.2.0",
     "typescript": "^5"
   }
 }
