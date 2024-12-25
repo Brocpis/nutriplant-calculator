@@ -3,6 +3,7 @@ import React from 'react'
 import { Tabs, ConfigProvider, Image } from 'antd'
 import LeafTab from './LeafTab'
 import SoilTab from './SoilTab'
+import PriceCal from './PriceCal'
 
 const { TabPane } = Tabs
 
@@ -38,6 +39,9 @@ const App: React.FC = () => {
           </TabPane>
           <TabPane tab="ทางดิน" key="ทางดิน">
             <SoilTab />
+          </TabPane>
+          <TabPane tab="คำนวณราคา" key="คำนวณราคา">
+            <PriceCal />
           </TabPane>
         </Tabs>
         {/* Footer */}
