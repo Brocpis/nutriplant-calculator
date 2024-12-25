@@ -31,7 +31,7 @@ const App: React.FC = () => {
           preview={false}
           style={{ marginBottom: 16 }}
         />
-        <h3>คำนวนปริมาณปุ๋ยที่ต้องใช้</h3>
+        <h3 style={{ color: '#000000' }}>คำนวนปริมาณปุ๋ยที่ต้องใช้</h3>
         <Tabs defaultActiveKey="ทางใบ">
           <TabPane tab="ทางใบ" key="ทางใบ">
             <LeafTab />
@@ -40,6 +40,10 @@ const App: React.FC = () => {
             <SoilTab />
           </TabPane>
         </Tabs>
+        {/* Footer */}
+        <footer style={{ marginTop: 24, fontSize: '12px', color: '#888' }}>
+          Created by Brocpis @ version 1.0.0
+        </footer>
       </div>
     </ConfigProvider>
   )
