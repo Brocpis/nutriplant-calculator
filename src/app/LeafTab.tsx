@@ -109,12 +109,12 @@ const LeafTab: React.FC = () => {
       key: 'amountPerUse'
     },
     {
-      title: `จำนวนใช้ทั้งหมด (${area || 'XX'} ไร่) (ซีซี)`,
+      title: `จำนวนใช้ทั้งหมดต่อ (${area || '0'} ไร่) (ซีซี)`,
       dataIndex: 'totalAmountPerArea',
       key: 'totalAmountPerArea'
     },
     {
-      title: `จำนวนใช้ทั้งหมด (${times || 'XX'} ครั้ง) (ซีซี)`,
+      title: `จำนวนใช้ทั้งหมดต่อ (${times || '0'} ครั้ง) (ซีซี)`,
       dataIndex: 'totalAmountForTimes',
       key: 'totalAmountForTimes'
     },
@@ -209,6 +209,7 @@ const LeafTab: React.FC = () => {
             min={1}
             style={{ width: '100%' }}
             onChange={(value) => setArea(value || 0)}
+            addonAfter={'ไร่'}
           />
         </Col>
       </Row>
@@ -219,6 +220,7 @@ const LeafTab: React.FC = () => {
             min={1}
             style={{ width: '100%' }}
             onChange={(value) => setTimes(value || 0)}
+            addonAfter={'ครั้ง'}
           />
         </Col>
         <Col span={12}>

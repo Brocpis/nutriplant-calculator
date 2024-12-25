@@ -23,6 +23,7 @@ interface FertilizerUsage {
   fertilizer: string // ใช้ string เพื่อแสดงชื่อภาษาไทย
   amountPerUse: number
   totalAmountPerArea: number
+  totalAmountForTimes: number
   litersRequired: number
   price: number
 }
@@ -31,14 +32,15 @@ const SoilTab: React.FC = () => {
   const [selectedPlant, setSelectedPlant] = useState<PlantType | null>(null)
   const [selectedStage, setSelectedStage] = useState<string | null>(null)
   const [area, setArea] = useState<number>(0)
+  const [times, setTimes] = useState<number>(0)
   const [summary, setSummary] = useState<FertilizerUsage[]>([])
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
   const [selectedFertilizerImage, setSelectedFertilizerImage] = useState<
-    string | null
+    null | string
   >(null)
 
   const calculateUsage = () => {
-    if (selectedPlant && selectedStage && area > 0) {
+    if (selectedPlant && selectedStage && area > 0 && times > 0) {
       const stageData =
         PlantStagesGrouped[selectedPlant]?.soilStages[selectedStage]
       if (stageData) {
@@ -47,7 +49,8 @@ const SoilTab: React.FC = () => {
             Object.entries(type || {}).map(([fertilizerKey, usage]) => {
               const usageAmount = usage || 0 // จำนวนใช้ต่อไร่
               const totalAmountPerArea = usageAmount * area // ใช้ทั้งหมดตามจำนวนไร่
-              const litersRequired = Math.ceil(totalAmountPerArea / 1000) // แปลงเป็นลิตร (ปัดขึ้น)
+              const totalAmountForTimes = totalAmountPerArea * times // ใช้ทั้งหมดตามจำนวนครั้ง
+              const litersRequired = Math.ceil(totalAmountForTimes / 1000) // แปลงเป็นลิตร (ปัดขึ้น)
               const pricePerUnit =
                 FertilizerPrices[fertilizerKey as FertilizerType] || 0
               const price = litersRequired * pricePerUnit // ราคา = จำนวนลิตร * ราคาต่อลิตร
@@ -55,6 +58,7 @@ const SoilTab: React.FC = () => {
                 fertilizer: fertilizerKey,
                 amountPerUse: usageAmount,
                 totalAmountPerArea,
+                totalAmountForTimes,
                 litersRequired,
                 price
               }
@@ -98,9 +102,14 @@ const SoilTab: React.FC = () => {
       key: 'amountPerUse'
     },
     {
-      title: `จำนวนใช้ทั้งหมด (${area || 'XX'} ไร่) (ซีซี)`,
+      title: `จำนวนใช้ทั้งหมด (${area || '0'} ไร่) (ซีซี)`,
       dataIndex: 'totalAmountPerArea',
       key: 'totalAmountPerArea'
+    },
+    {
+      title: `จำนวนใช้ทั้งหมด (${times || '0'} ครั้ง) (ซีซี)`,
+      dataIndex: 'totalAmountForTimes',
+      key: 'totalAmountForTimes'
     },
     {
       title: 'จำนวนลิตร',
@@ -167,12 +176,22 @@ const SoilTab: React.FC = () => {
         </Col>
       </Row>
       <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
-        <Col span={24}>
+        <Col span={12}>
           <InputNumber
             placeholder="จำนวนไร่"
             min={1}
             style={{ width: '100%' }}
+            addonAfter="ไร่"
             onChange={(value) => setArea(value || 0)}
+          />
+        </Col>
+        <Col span={12}>
+          <InputNumber
+            placeholder="จำนวนครั้ง"
+            min={1}
+            style={{ width: '100%' }}
+            addonAfter="ครั้ง"
+            onChange={(value) => setTimes(value || 0)}
           />
         </Col>
       </Row>
@@ -180,7 +199,7 @@ const SoilTab: React.FC = () => {
         type="primary"
         style={{ width: '100%', marginTop: 16 }}
         onClick={calculateUsage}
-        disabled={!selectedStage || area <= 0}
+        disabled={!selectedStage || area <= 0 || times <= 0}
       >
         คำนวน
       </Button>
