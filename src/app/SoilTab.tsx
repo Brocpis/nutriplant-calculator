@@ -196,17 +196,13 @@ const SoilTab: React.FC = () => {
       )}
 
       {/* Modal for displaying fertilizer image */}
-      <Modal
-        visible={isModalVisible}
-        onCancel={closeModal}
-        footer={null}
-        centered
-      >
+      <Modal open={isModalVisible} onCancel={closeModal} footer={null} centered>
         {selectedFertilizerImage && (
           <Image
             src={selectedFertilizerImage}
             alt="Fertilizer Image"
             style={{ width: '100%' }}
+            preview={false}
           />
         )}
       </Modal>

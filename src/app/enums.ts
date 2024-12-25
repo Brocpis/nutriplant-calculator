@@ -13,6 +13,12 @@ export enum PlantType {
   FLOWERING_PLANTS = 'ไม้ดอก'
 }
 
+export enum CanopySize {
+  SMALL = 1, // 20 liters/ไร่
+  MEDIUM = 1.5, // 30 liters/ไร่
+  LARGE = 2 // 40 liters/ไร่
+}
+
 export enum FertilizerType {
   APSA_80 = 'แอ็ปซ่า-80',
   NITROGEN_PLUS = 'ไนโตรเจน พลัส (30-0-0)',
@@ -47,6 +53,8 @@ export const FertilizerImage: Record<FertilizerType, string> = {
 }
 
 export enum FertilizerFormula {
+  FORMULA_0_0_28 = '0-0-28',
+  FORMULA_4_18_18 = '4-18-18',
   FORMULA_17_9_9 = '17-9-9',
   FORMULA_9_14_14 = '9-14-14',
   FORMULA_14_7_24 = '14-7-24',
@@ -652,22 +660,22 @@ export const PlantStagesGrouped: Record<
     },
     soilStages: {
       SOIL_PREP: {
-        description: 'การเตรียมดินก่อนปลูกพืชรับประทานผล',
+        description: 'การเตรียมดินก่อนปลูกพืชผัก',
         fertilizers: [
           {
             type: {
-              [FertilizerType.APSA_80]: 3,
+              [FertilizerType.APSA_80]: 20,
               [FertilizerType.SOIL_PLUS]: 100
             }
           }
         ]
       },
       PLANTED: {
-        description: 'กรณีปลูกพืชรับประทานผลแล้ว',
+        description: 'กรณีปลูกพืชผักแล้ว',
         fertilizers: [
           {
             type: {
-              [FertilizerType.APSA_80]: 3,
+              [FertilizerType.APSA_80]: 2,
               [FertilizerType.SOIL_PLUS]: 100
             }
           }
@@ -727,22 +735,22 @@ export const PlantStagesGrouped: Record<
     },
     soilStages: {
       SOIL_PREP: {
-        description: 'การเตรียมดินก่อนปลูกพืชรับประทานหัว',
+        description: 'การเตรียมดินก่อนปลูกพืชผัก',
         fertilizers: [
           {
             type: {
-              [FertilizerType.APSA_80]: 3,
+              [FertilizerType.APSA_80]: 20,
               [FertilizerType.SOIL_PLUS]: 100
             }
           }
         ]
       },
       PLANTED: {
-        description: 'กรณีปลูกพืชรับประทานหัวแล้ว',
+        description: 'กรณีปลูกพืชผักแล้ว',
         fertilizers: [
           {
             type: {
-              [FertilizerType.APSA_80]: 3,
+              [FertilizerType.APSA_80]: 2,
               [FertilizerType.SOIL_PLUS]: 100
             }
           }
@@ -752,157 +760,295 @@ export const PlantStagesGrouped: Record<
   },
   [PlantType.LEAF_VEGETABLES]: {
     leafStages: {
-      STAGE_35_40_DAYS: {
-        description: 'อายุ 35-40 วัน (นาปรัง) / อายุ 60-70 วัน (นาปี)',
-        fertilizers: {
-          formula: [
-            FertilizerFormula.FORMULA_17_9_9,
-            FertilizerFormula.FORMULA_9_14_14
-          ],
-          type: {
-            [FertilizerType.APSA_80]: '2-3 ซีซี',
-            [FertilizerType.NITROGEN_PLUS]: '50 ซีซี',
-            [FertilizerType.NPK_PLUS]: '50 ซีซี',
-            [FertilizerType.POTASSIUM_PLUS]: '-',
-            [FertilizerType.AG]: '40 ซีซี',
-            [FertilizerType.CALCIUM_BORON]: '30 ซีซี',
-            [FertilizerType.ZINC_PLUS]: '40 ซีซี'
+      GROWTH: {
+        description: 'เริ่มปลูกหรือบำรุงต้น',
+        fertilizers: [
+          {
+            formula: FertilizerFormula.FORMULA_20_7_7,
+            type: {
+              [FertilizerType.APSA_80]: 3,
+              [FertilizerType.NITROGEN_PLUS]: 60,
+              [FertilizerType.NPK_PLUS]: 40,
+              [FertilizerType.AG]: 40,
+              [FertilizerType.CALCIUM_BORON]: 30,
+              [FertilizerType.ZINC_PLUS]: 40
+            }
+          },
+          {
+            formula: FertilizerFormula.FORMULA_15_14_14,
+            type: {
+              [FertilizerType.APSA_80]: 3,
+              [FertilizerType.NITROGEN_PLUS]: 40,
+              [FertilizerType.NPK_PLUS]: 80,
+              [FertilizerType.AG]: 30,
+              [FertilizerType.CALCIUM_BORON]: 30,
+              [FertilizerType.ZINC_PLUS]: 40
+            }
           }
-        }
+        ]
       }
     },
     soilStages: {
-      PLANTED: {
-        description: 'กรณีปลูกยางพาราแล้ว',
-        fertilizers: {
-          formula: [FertilizerFormula.FORMULA_30_5_18],
-          type: {
-            [FertilizerType.APSA_80]: '2-3 ซีซี',
-            [FertilizerType.NITROGEN_PLUS]: '30 ซีซี',
-            [FertilizerType.NPK_PLUS]: '40 ซีซี',
-            [FertilizerType.POTASSIUM_PLUS]: '40 ซีซี',
-            [FertilizerType.AG]: '50 ซีซี',
-            [FertilizerType.CALCIUM_BORON]: '30 ซีซี',
-            [FertilizerType.ZINC_PLUS]: '40 ซีซี'
+      SOIL_PREP: {
+        description: 'การเตรียมดินก่อนปลูกพืชผัก',
+        fertilizers: [
+          {
+            type: {
+              [FertilizerType.APSA_80]: 20,
+              [FertilizerType.SOIL_PLUS]: 100
+            }
           }
-        }
+        ]
+      },
+      PLANTED: {
+        description: 'กรณีปลูกพืชผักแล้ว',
+        fertilizers: [
+          {
+            type: {
+              [FertilizerType.APSA_80]: 2,
+              [FertilizerType.SOIL_PLUS]: 100
+            }
+          }
+        ]
       }
     }
   },
   [PlantType.FRUIT_TREES]: {
     leafStages: {
-      STAGE_35_40_DAYS: {
-        description: 'อายุ 35-40 วัน (นาปรัง) / อายุ 60-70 วัน (นาปี)',
-        fertilizers: {
-          formula: [
-            FertilizerFormula.FORMULA_17_9_9,
-            FertilizerFormula.FORMULA_9_14_14
-          ],
-          type: {
-            [FertilizerType.APSA_80]: '2-3 ซีซี',
-            [FertilizerType.NITROGEN_PLUS]: '50 ซีซี',
-            [FertilizerType.NPK_PLUS]: '50 ซีซี',
-            [FertilizerType.POTASSIUM_PLUS]: '-',
-            [FertilizerType.AG]: '40 ซีซี',
-            [FertilizerType.CALCIUM_BORON]: '30 ซีซี',
-            [FertilizerType.ZINC_PLUS]: '40 ซีซี'
+      FERTILIZATION: {
+        description: 'เริ่มปลูกหรือหลังตัดแต่งฉีดพ่นเดือนละครั้ง',
+        fertilizers: [
+          {
+            formula: FertilizerFormula.FORMULA_20_7_7,
+            type: {
+              [FertilizerType.APSA_80]: 3,
+              [FertilizerType.NITROGEN_PLUS]: 60,
+              [FertilizerType.NPK_PLUS]: 40,
+              [FertilizerType.AG]: 40,
+              [FertilizerType.CALCIUM_BORON]: 30,
+              [FertilizerType.ZINC_PLUS]: 40
+            }
+          },
+          {
+            formula: FertilizerFormula.FORMULA_15_14_14,
+            type: {
+              [FertilizerType.APSA_80]: 3,
+              [FertilizerType.NITROGEN_PLUS]: 40,
+              [FertilizerType.NPK_PLUS]: 80,
+              [FertilizerType.AG]: 50,
+              [FertilizerType.CALCIUM_BORON]: 30,
+              [FertilizerType.ZINC_PLUS]: 40
+            }
           }
-        }
+        ]
+      },
+      FLOWERING: {
+        description: 'ช่วงเร่งติดดอก',
+        fertilizers: [
+          {
+            formula: FertilizerFormula.FORMULA_4_18_18,
+            type: {
+              [FertilizerType.APSA_80]: 3,
+              [FertilizerType.NPK_PLUS]: 100,
+              [FertilizerType.AG]: 50,
+              [FertilizerType.CALCIUM_BORON]: 30,
+              [FertilizerType.ZINC_PLUS]: 40
+            }
+          }
+        ]
+      },
+      FRUIT_DEVELOPMENT: {
+        description: 'หลังติดผล บำรุงผล 15 วันในระยะต่อเนื่องจากสูตรเร่งติดดอก',
+        fertilizers: [
+          {
+            formula: FertilizerFormula.FORMULA_13_13_21,
+            type: {
+              [FertilizerType.APSA_80]: 3,
+              [FertilizerType.NITROGEN_PLUS]: 35,
+              [FertilizerType.NPK_PLUS]: 70,
+              [FertilizerType.POTASSIUM_PLUS]: 70,
+              [FertilizerType.AG]: 30,
+              [FertilizerType.CALCIUM_BORON]: 30,
+              [FertilizerType.ZINC_PLUS]: 40
+            }
+          }
+        ]
+      },
+      PRE_HARVEST: {
+        description: 'ก่อนเก็บผล 1 สัปดาห์ ใช้ปุ๋ยแต่งรสชาติ',
+        fertilizers: [
+          {
+            formula: FertilizerFormula.FORMULA_0_0_28,
+            type: {
+              [FertilizerType.APSA_80]: 3,
+              [FertilizerType.POTASSIUM_PLUS]: 100,
+              [FertilizerType.CALCIUM_BORON]: 40
+            }
+          }
+        ]
       }
     },
     soilStages: {
-      PLANTED: {
-        description: 'กรณีปลูกยางพาราแล้ว',
-        fertilizers: {
-          formula: [FertilizerFormula.FORMULA_30_5_18],
-          type: {
-            [FertilizerType.APSA_80]: '2-3 ซีซี',
-            [FertilizerType.NITROGEN_PLUS]: '30 ซีซี',
-            [FertilizerType.NPK_PLUS]: '40 ซีซี',
-            [FertilizerType.POTASSIUM_PLUS]: '40 ซีซี',
-            [FertilizerType.AG]: '50 ซีซี',
-            [FertilizerType.CALCIUM_BORON]: '30 ซีซี',
-            [FertilizerType.ZINC_PLUS]: '40 ซีซี'
+      SOIL_PREP: {
+        description: 'การเตรียมดินก่อนปลูกไม้ผล',
+        fertilizers: [
+          {
+            type: {
+              [FertilizerType.APSA_80]: 20,
+              [FertilizerType.SOIL_PLUS]: 100
+            }
           }
-        }
+        ]
+      },
+      PLANTED: {
+        description: 'กรณีปลูกไม้ผลแล้ว',
+        fertilizers: [
+          {
+            type: {
+              [FertilizerType.APSA_80]: 2,
+              [FertilizerType.SOIL_PLUS]: 100
+            }
+          }
+        ]
       }
     }
   },
   [PlantType.ORCHIDS]: {
     leafStages: {
-      STAGE_35_40_DAYS: {
-        description: 'อายุ 35-40 วัน (นาปรัง) / อายุ 60-70 วัน (นาปี)',
-        fertilizers: {
-          formula: [
-            FertilizerFormula.FORMULA_17_9_9,
-            FertilizerFormula.FORMULA_9_14_14
-          ],
-          type: {
-            [FertilizerType.APSA_80]: '2-3 ซีซี',
-            [FertilizerType.NITROGEN_PLUS]: '50 ซีซี',
-            [FertilizerType.NPK_PLUS]: '50 ซีซี',
-            [FertilizerType.POTASSIUM_PLUS]: '-',
-            [FertilizerType.AG]: '40 ซีซี',
-            [FertilizerType.CALCIUM_BORON]: '30 ซีซี',
-            [FertilizerType.ZINC_PLUS]: '40 ซีซี'
+      REGEN: {
+        description: 'ช่วงฟื้นฟูต้น',
+        fertilizers: [
+          {
+            formula: FertilizerFormula.FORMULA_20_7_7,
+            type: {
+              [FertilizerType.APSA_80]: 3,
+              [FertilizerType.NITROGEN_PLUS]: 60,
+              [FertilizerType.NPK_PLUS]: 40,
+              [FertilizerType.AG]: 50,
+              [FertilizerType.CALCIUM_BORON]: 30,
+              [FertilizerType.ZINC_PLUS]: 40
+            }
           }
-        }
+        ]
+      },
+      NOURISH: {
+        description: 'ช่วงบำรุงต้น',
+        fertilizers: [
+          {
+            formula: FertilizerFormula.FORMULA_15_14_14,
+            type: {
+              [FertilizerType.APSA_80]: 3,
+              [FertilizerType.NITROGEN_PLUS]: 40,
+              [FertilizerType.NPK_PLUS]: 80,
+              [FertilizerType.AG]: 30,
+              [FertilizerType.CALCIUM_BORON]: 30,
+              [FertilizerType.ZINC_PLUS]: 40
+            }
+          }
+        ]
+      },
+      FLOWERING: {
+        description: 'เร่งติดดอก',
+        fertilizers: [
+          {
+            formula: FertilizerFormula.FORMULA_4_18_18,
+            type: {
+              [FertilizerType.APSA_80]: 3,
+              [FertilizerType.NPK_PLUS]: 100,
+              [FertilizerType.AG]: 30,
+              [FertilizerType.CALCIUM_BORON]: 30,
+              [FertilizerType.ZINC_PLUS]: 40
+            }
+          }
+        ]
       }
     },
     soilStages: {
-      PLANTED: {
-        description: 'กรณีปลูกยางพาราแล้ว',
-        fertilizers: {
-          formula: [FertilizerFormula.FORMULA_30_5_18],
-          type: {
-            [FertilizerType.APSA_80]: '2-3 ซีซี',
-            [FertilizerType.NITROGEN_PLUS]: '30 ซีซี',
-            [FertilizerType.NPK_PLUS]: '40 ซีซี',
-            [FertilizerType.POTASSIUM_PLUS]: '40 ซีซี',
-            [FertilizerType.AG]: '50 ซีซี',
-            [FertilizerType.CALCIUM_BORON]: '30 ซีซี',
-            [FertilizerType.ZINC_PLUS]: '40 ซีซี'
+      SOIL_PREP: {
+        description: 'ไม่มีใช้',
+        fertilizers: [
+          {
+            type: {
+              [FertilizerType.APSA_80]: 0
+            }
           }
-        }
+        ]
       }
     }
   },
   [PlantType.FLOWERING_PLANTS]: {
     leafStages: {
-      STAGE_35_40_DAYS: {
-        description: 'อายุ 35-40 วัน (นาปรัง) / อายุ 60-70 วัน (นาปี)',
-        fertilizers: {
-          formula: [
-            FertilizerFormula.FORMULA_17_9_9,
-            FertilizerFormula.FORMULA_9_14_14
-          ],
-          type: {
-            [FertilizerType.APSA_80]: '2-3 ซีซี',
-            [FertilizerType.NITROGEN_PLUS]: '50 ซีซี',
-            [FertilizerType.NPK_PLUS]: '50 ซีซี',
-            [FertilizerType.POTASSIUM_PLUS]: '-',
-            [FertilizerType.AG]: '40 ซีซี',
-            [FertilizerType.CALCIUM_BORON]: '30 ซีซี',
-            [FertilizerType.ZINC_PLUS]: '40 ซีซี'
+      REGEN: {
+        description: 'ช่วงติดใบ 5-10 ใบและช่วงฟื้นฟูต้น',
+        fertilizers: [
+          {
+            formula: FertilizerFormula.FORMULA_20_7_7,
+            type: {
+              [FertilizerType.APSA_80]: 3,
+              [FertilizerType.NITROGEN_PLUS]: 60,
+              [FertilizerType.NPK_PLUS]: 40,
+              [FertilizerType.AG]: 50,
+              [FertilizerType.CALCIUM_BORON]: 30,
+              [FertilizerType.ZINC_PLUS]: 40
+            }
           }
-        }
+        ]
+      },
+      NOURISH: {
+        description: 'ช่วงบำรุงต้น',
+        fertilizers: [
+          {
+            formula: FertilizerFormula.FORMULA_15_14_14,
+            type: {
+              [FertilizerType.APSA_80]: 3,
+              [FertilizerType.NITROGEN_PLUS]: 40,
+              [FertilizerType.NPK_PLUS]: 80,
+              [FertilizerType.AG]: 30,
+              [FertilizerType.CALCIUM_BORON]: 30,
+              [FertilizerType.ZINC_PLUS]: 40
+            }
+          }
+        ]
+      },
+      FLOWERING: {
+        description: 'เร่งติดดอกบำรุงให้ดอกออกต่อเนื่อง',
+        fertilizers: [
+          {
+            formula: FertilizerFormula.FORMULA_9_14_14,
+            type: {
+              [FertilizerType.APSA_80]: 3,
+              [FertilizerType.NITROGEN_PLUS]: 20,
+              [FertilizerType.NPK_PLUS]: 80,
+              [FertilizerType.AG]: 30,
+              [FertilizerType.CALCIUM_BORON]: 30,
+              [FertilizerType.ZINC_PLUS]: 40
+            }
+          }
+        ]
       }
     },
     soilStages: {
-      PLANTED: {
-        description: 'กรณีปลูกยางพาราแล้ว',
-        fertilizers: {
-          formula: [FertilizerFormula.FORMULA_30_5_18],
-          type: {
-            [FertilizerType.APSA_80]: '2-3 ซีซี',
-            [FertilizerType.NITROGEN_PLUS]: '30 ซีซี',
-            [FertilizerType.NPK_PLUS]: '40 ซีซี',
-            [FertilizerType.POTASSIUM_PLUS]: '40 ซีซี',
-            [FertilizerType.AG]: '50 ซีซี',
-            [FertilizerType.CALCIUM_BORON]: '30 ซีซี',
-            [FertilizerType.ZINC_PLUS]: '40 ซีซี'
+      SOIL_PREP: {
+        description: 'การเตรียมดินก่อนปลูกไม้ดอก',
+        fertilizers: [
+          {
+            type: {
+              [FertilizerType.APSA_80]: 20,
+              [FertilizerType.SOIL_PLUS]: 100
+            }
           }
-        }
+        ]
+      },
+      PLANTED: {
+        description: 'กรณีปลูกไม้ดอกแล้ว',
+        fertilizers: [
+          {
+            type: {
+              [FertilizerType.APSA_80]: 2,
+              [FertilizerType.SOIL_PLUS]: 100
+            }
+          }
+        ]
       }
     }
   }

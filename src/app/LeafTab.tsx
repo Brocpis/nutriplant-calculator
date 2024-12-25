@@ -15,10 +15,13 @@ import {
   FertilizerPrices,
   PlantStagesGrouped,
   FertilizerFormula,
-  FertilizerImage
+  FertilizerImage,
+  CanopySize
 } from './enums'
 
 const { Option } = Select
+
+// Enum for canopy size multipliers
 
 interface FertilizerUsage {
   fertilizer: string // ใช้ string เพื่อแสดงชื่อภาษาไทย
@@ -36,10 +39,13 @@ const LeafTab: React.FC = () => {
     useState<FertilizerFormula | null>(null)
   const [area, setArea] = useState<number>(0)
   const [times, setTimes] = useState<number>(0)
+  const [selectedCanopySize, setSelectedCanopySize] = useState<number>(
+    CanopySize.SMALL
+  )
   const [summary, setSummary] = useState<FertilizerUsage[]>([])
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
   const [selectedFertilizerImage, setSelectedFertilizerImage] = useState<
-    string | null
+    null | string
   >(null)
 
   const calculateUsage = () => {
@@ -50,7 +56,7 @@ const LeafTab: React.FC = () => {
         const result = Object.entries(stageData.fertilizers[0]?.type || {}).map(
           ([fertilizerKey, usage]) => {
             const usageAmount = usage || 0 // จำนวนใช้ต่อครั้ง (ซีซี)
-            const totalAmountPerArea = usageAmount * area // ใช้ทั้งหมดต่อไร่
+            const totalAmountPerArea = usageAmount * area * selectedCanopySize // ใช้ทั้งหมดตามจำนวนไร่และทรงพุ่ม
             const totalAmountForTimes = totalAmountPerArea * times // ใช้ทั้งหมดตามจำนวนครั้ง
             const litersRequired = Math.ceil(totalAmountForTimes / 1000) // แปลงเป็นลิตร (ปัดขึ้น)
             const pricePerUnit =
@@ -103,7 +109,7 @@ const LeafTab: React.FC = () => {
       key: 'amountPerUse'
     },
     {
-      title: `จำนวนใช้ทั้งหมด (${area || 'XX'} ไร่)`,
+      title: `จำนวนใช้ทั้งหมด (${area || 'XX'} ไร่) (ซีซี)`,
       dataIndex: 'totalAmountPerArea',
       key: 'totalAmountPerArea'
     },
@@ -145,7 +151,7 @@ const LeafTab: React.FC = () => {
               const plantKey = plant as keyof typeof PlantType
               return (
                 <Option key={plant} value={plant}>
-                  {plantKey}
+                  {PlantType[plantKey]}
                 </Option>
               )
             })}
@@ -215,6 +221,18 @@ const LeafTab: React.FC = () => {
             onChange={(value) => setTimes(value || 0)}
           />
         </Col>
+        <Col span={12}>
+          <Select
+            placeholder="เลือกขนาดทรงพุ่ม"
+            style={{ width: '100%' }}
+            value={selectedCanopySize}
+            onChange={(value) => setSelectedCanopySize(value as number)}
+          >
+            <Option value={CanopySize.SMALL}>พุ่มขนาดเล็ก (20ลิตร/ไร่)</Option>
+            <Option value={CanopySize.MEDIUM}>พุ่มขนาดกลาง (30ลิตร/ไร่)</Option>
+            <Option value={CanopySize.LARGE}>พุ่มขนาดใหญ่ (40ลิตร/ไร่)</Option>
+          </Select>
+        </Col>
       </Row>
       <Button
         type="primary"
@@ -236,17 +254,13 @@ const LeafTab: React.FC = () => {
       )}
 
       {/* Modal for displaying fertilizer image */}
-      <Modal
-        visible={isModalVisible}
-        onCancel={closeModal}
-        footer={null}
-        centered
-      >
+      <Modal open={isModalVisible} onCancel={closeModal} footer={null} centered>
         {selectedFertilizerImage && (
           <Image
             src={selectedFertilizerImage}
             alt="Fertilizer Image"
             style={{ width: '100%' }}
+            preview={false}
           />
         )}
       </Modal>
