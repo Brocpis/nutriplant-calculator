@@ -3,7 +3,6 @@ import React from 'react'
 import { Tabs, ConfigProvider, Image } from 'antd'
 import LeafTab from './LeafTab'
 import SoilTab from './SoilTab'
-import PriceCal from './PriceCal'
 
 const { TabPane } = Tabs
 
@@ -40,11 +39,7 @@ const App: React.FC = () => {
           <TabPane tab="ทางดิน" key="ทางดิน">
             <SoilTab />
           </TabPane>
-          <TabPane tab="คำนวณราคา" key="คำนวณราคา">
-            <PriceCal />
-          </TabPane>
         </Tabs>
-        {/* Footer */}
         <footer style={{ marginTop: 24, fontSize: '12px', color: '#888' }}>
           Created by Brocpis @ version 1.0.0
         </footer>
