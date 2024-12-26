@@ -12,7 +12,8 @@ import {
 import {
   DeleteOutlined,
   RollbackOutlined,
-  PlusOutlined
+  PlusOutlined,
+  CalculatorOutlined
 } from '@ant-design/icons'
 import {
   FertilizerType,
@@ -25,6 +26,7 @@ const { Option } = Select
 
 interface FertilizerUsage {
   fertilizer: string
+  amountPerUse: number
   pricePerCC: number
   pricePerUsePerArea: number
   pricePerUseTotalArea: number
@@ -42,6 +44,7 @@ const PriceCal: React.FC = () => {
   const [isModalVisible, setIsModalVisible] = useState<boolean>(false)
   const [selectedFertilizer, setSelectedFertilizer] =
     useState<FertilizerType | null>(null)
+  const [amountPerUse, setAmountPerUse] = useState<number>(0)
 
   const openFertilizerModal = () => {
     setIsModalVisible(true)
@@ -50,18 +53,19 @@ const PriceCal: React.FC = () => {
   const closeModal = () => {
     setIsModalVisible(false)
     setSelectedFertilizer(null)
+    setAmountPerUse(0)
   }
 
   const confirmFertilizer = () => {
-    if (selectedFertilizer) {
-      const pricePerCC = FertilizerPrices[selectedFertilizer]
+    if (selectedFertilizer && amountPerUse > 0) {
+      const pricePerCC = FertilizerPrices[selectedFertilizer] / 1000 // Convert to price per cc
       const newFertilizer: FertilizerUsage = {
         fertilizer: selectedFertilizer,
+        amountPerUse,
         pricePerCC,
-        pricePerUsePerArea: pricePerCC * area * selectedCanopySize,
-        pricePerUseTotalArea: pricePerCC * area * selectedCanopySize * area,
-        pricePerUseTotalAreaTimes:
-          pricePerCC * area * selectedCanopySize * area * times
+        pricePerUsePerArea: pricePerCC * amountPerUse,
+        pricePerUseTotalArea: pricePerCC * amountPerUse * area,
+        pricePerUseTotalAreaTimes: pricePerCC * amountPerUse * area * times
       }
       setSummary((prev) => [...prev, newFertilizer])
       closeModal()
@@ -82,6 +86,11 @@ const PriceCal: React.FC = () => {
     setSummary((prev) => [...prev, record])
   }
 
+  const calculateTotal = () => {
+    console.log('Calculating totals...')
+    // Placeholder for additional calculation logic if needed
+  }
+
   const columns = [
     {
       title: 'ชื่อปุ๋ย',
@@ -91,6 +100,11 @@ const PriceCal: React.FC = () => {
       render: (text: string) => (
         <span style={{ color: '#10B981', cursor: 'pointer' }}>{text}</span>
       )
+    },
+    {
+      title: 'ปริมาณต่อไร่ (ซีซี)',
+      dataIndex: 'amountPerUse',
+      key: 'amountPerUse'
     },
     {
       title: 'ราคา / ซีซี',
@@ -166,13 +180,24 @@ const PriceCal: React.FC = () => {
           </Select>
         </Col>
       </Row>
-      <Button
-        type="primary"
-        style={{ width: '100%', marginTop: 16 }}
-        onClick={openFertilizerModal}
-      >
-        <PlusOutlined /> เพิ่มปุ๋ย
-      </Button>
+      <Row justify="space-between" style={{ marginTop: 16 }}>
+        <Col>
+          <Button
+            type="primary"
+            shape="circle"
+            icon={<PlusOutlined />}
+            onClick={openFertilizerModal}
+          />
+        </Col>
+        <Col>
+          <Button
+            type="default"
+            shape="circle"
+            icon={<CalculatorOutlined />}
+            onClick={calculateTotal}
+          />
+        </Col>
+      </Row>
       <Table
         columns={columns}
         dataSource={summary}
@@ -247,12 +272,23 @@ const PriceCal: React.FC = () => {
                 <div>
                   <h4 style={{ margin: 0 }}>{fertilizer}</h4>
                   <p style={{ margin: 0 }}>
-                    ราคา: {price.toLocaleString()} บาท/ซีซี
+                    ราคา: {(price / 1000).toLocaleString()} บาท/ซีซี
                   </p>
                 </div>
               </div>
             </Col>
           ))}
+        </Row>
+        <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
+          <Col span={24}>
+            <InputNumber
+              placeholder="ปริมาณการใช้ต่อไร่ (ซีซี)"
+              min={1}
+              style={{ width: '100%' }}
+              onChange={(value) => setAmountPerUse(value || 0)}
+              addonAfter="ซีซี"
+            />
+          </Col>
         </Row>
       </Modal>
     </>
