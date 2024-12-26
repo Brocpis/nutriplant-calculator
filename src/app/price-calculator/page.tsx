@@ -22,7 +22,7 @@ const FertilizerComparison: React.FC = () => {
         <Content style={{ padding: '20px', backgroundColor: '#FFFFFF' }}>
           <div style={{ textAlign: 'center', marginBottom: '20px' }}>
             <Image
-              src="/logo.jpg"
+              src="/logo.png"
               alt="Logo"
               preview={false}
               style={{

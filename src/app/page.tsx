@@ -25,7 +25,7 @@ const App: React.FC = () => {
         }}
       >
         <Image
-          src="/logo.jpg"
+          src="/logo.png"
           alt="Logo"
           width={150}
           preview={false}

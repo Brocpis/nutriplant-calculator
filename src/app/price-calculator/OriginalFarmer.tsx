@@ -71,19 +71,19 @@ const OriginalFarmer: React.FC = () => {
       title: 'ราคา (บาท/ซีซี)',
       dataIndex: 'pricePerCC',
       key: 'pricePerCC',
-      render: (value: number) => value.toFixed(2) // แสดงราคาเป็นทศนิยม 2 ตำแหน่ง
+      render: (value: number) => value.toFixed(2)
     },
     {
       title: 'ราคาต่อไร่',
       dataIndex: 'pricePerUsePerArea',
       key: 'pricePerUsePerArea',
-      render: (value: number) => value.toLocaleString() // แสดงราคาเป็นตัวเลข
+      render: (value: number) => value.toLocaleString()
     },
     {
       title: 'ใช้ได้กี่ไร่',
       dataIndex: 'usableArea',
       key: 'usableArea',
-      render: (value: number) => value.toFixed(2) // แสดงผลเป็นทศนิยม 2 ตำแหน่ง
+      render: (value: number) => value.toFixed(2)
     }
   ]
 
@@ -124,11 +124,13 @@ const OriginalFarmer: React.FC = () => {
         <AutoComplete
           style={{ width: '100%', marginBottom: '16px' }}
           options={[
-            { value: 'ปุ๋ยธาตุอาหารหลัก' },
-            { value: 'ปุ๋ยธาตุอาหารรอง' },
-            { value: 'สารเสริมประสิทธิภาพ' },
-            { value: 'ยาฆ่าแมลง' },
-            { value: 'ฮอร์โมน' }
+            { value: 'ปุ๋ยทางดินธาตุอาหารหลัก', key: '1' },
+            { value: 'ปุ๋ยทางใบธาตุอาหารหลัก', key: '2' },
+            { value: 'ปุ๋ยทางดินธาตุอาหารรอง', key: '3' },
+            { value: 'ปุ๋ยทางดินธาตุอาหารรอง', key: '4' },
+            { value: 'สารเสริมประสิทธิภาพ', key: '5' },
+            { value: 'ยาฆ่าแมลง', key: '6' },
+            { value: 'ฮอร์โมน', key: '7' }
           ]}
           placeholder="ชื่อปุ๋ย"
           value={selectedFertilizer || ''}

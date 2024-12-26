@@ -17,7 +17,7 @@ interface FertilizerUsage {
   amountPerUse: number
   price: number
   pricePerUsePerArea: number
-  usableArea: number // ใช้ได้กี่ไร่
+  usableArea: number
 }
 
 const NutriplantFarmer: React.FC = () => {
@@ -192,13 +192,13 @@ const NutriplantFarmer: React.FC = () => {
         <AutoComplete
           style={{ width: '100%', marginBottom: '16px' }}
           options={[
-            { value: 'ปุ๋ยทางดินธาตุอาหารหลัก' },
-            { value: 'ปุ๋ยทางใบธาตุอาหารหลัก' },
-            { value: 'ปุ๋ยทางดินธาตุอาหารรอง' },
-            { value: 'ปุ๋ยทางดินธาตุอาหารรอง' },
-            { value: 'สารเสริมประสิทธิภาพ' },
-            { value: 'ยาฆ่าแมลง' },
-            { value: 'ฮอร์โมน' }
+            { value: 'ปุ๋ยทางดินธาตุอาหารหลัก', key: '1' },
+            { value: 'ปุ๋ยทางใบธาตุอาหารหลัก', key: '2' },
+            { value: 'ปุ๋ยทางดินธาตุอาหารรอง', key: '3' },
+            { value: 'ปุ๋ยทางดินธาตุอาหารรอง', key: '4' },
+            { value: 'สารเสริมประสิทธิภาพ', key: '5' },
+            { value: 'ยาฆ่าแมลง', key: '6' },
+            { value: 'ฮอร์โมน', key: '7' }
           ]}
           placeholder="ชื่อปุ๋ย"
           value={selectedFertilizer || ''}
