@@ -26,6 +26,7 @@ const FertilizerComparison: React.FC = () => {
               alt="Logo"
               preview={false}
               style={{
+                width: '150px',
                 height: '150px',
                 marginBottom: '10px'
               }}
