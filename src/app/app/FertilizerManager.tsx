@@ -14,13 +14,15 @@ import {
   Card,
   Layout,
   Space,
-  Descriptions
+  Descriptions,
+  Image
 } from 'antd'
 import {
   PlusOutlined,
   DeleteOutlined,
   DownloadOutlined,
-  EditOutlined
+  EditOutlined,
+  CloseOutlined
 } from '@ant-design/icons'
 import * as XLSX from 'xlsx'
 import dayjs, { Dayjs } from 'dayjs'
@@ -32,6 +34,7 @@ import {
   FertilizerUsage
 } from './fertilizerUtils'
 import {
+  FertilizerDescribe,
   FertilizerImage,
   FertilizerPrices,
   FertilizerType,
@@ -66,6 +69,18 @@ const FertilizerManager: React.FC = () => {
   const [editingFertilizerIndex, setEditingFertilizerIndex] = useState<
     number | null
   >(null)
+
+  const [isPopupVisible, setIsPopupVisible] = useState(false)
+  const [popupContent, setPopupContent] = useState<string | null>(null)
+
+  const handlePopup = (fertilizer: string) => {
+    setPopupContent(fertilizer) // อัปเดตเนื้อหาของปุ๋ย
+    setIsPopupVisible(true) // แสดง popup
+  }
+
+  const closePopup = () => {
+    setIsPopupVisible(false) // ซ่อน popup
+  }
 
   const isPeriodFormValid = () => {
     return periodName && startDate && endDate && interval
@@ -212,7 +227,35 @@ const FertilizerManager: React.FC = () => {
   }
 
   const periodColumns = (period: Period) => [
-    { title: 'ชื่อปุ๋ย', dataIndex: 'fertilizer', key: 'fertilizer' },
+    {
+      title: 'ชื่อปุ๋ย',
+      dataIndex: 'fertilizer',
+      key: 'fertilizer',
+      render: (text: string) => {
+        const isNutriplant = Object.values(FertilizerType).includes(
+          text as FertilizerType
+        )
+        return (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            {isNutriplant && (
+              <img
+                src={FertilizerImage[text as FertilizerType]}
+                alt={text}
+                style={{
+                  width: 40,
+                  height: 40,
+                  marginRight: 8,
+                  cursor: 'pointer',
+                  borderRadius: '4px'
+                }}
+                onClick={() => handlePopup(text)}
+              />
+            )}
+            <span>{text}</span>
+          </div>
+        )
+      }
+    },
     { title: 'ราคา (บาท)', dataIndex: 'price', key: 'price' },
     { title: 'ปริมาณ (ซีซี)', dataIndex: 'amountPerUse', key: 'amountPerUse' },
     {
@@ -308,6 +351,10 @@ const FertilizerManager: React.FC = () => {
         {current.date()}
       </div>
     )
+  }
+
+  const handleDeleteTemplate = (index: number) => {
+    setFertilizerTemplates((prev) => prev.filter((_, i) => i !== index))
   }
 
   const exportToExcel = () => {
@@ -699,10 +746,27 @@ const FertilizerManager: React.FC = () => {
                 value: `template:${template.name}_${index}`,
                 label: (
                   <div
-                    style={{ display: 'flex', justifyContent: 'space-between' }}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}
                   >
                     <span>{template.name}</span>
-                    <span>{`ราคา: ${template.price} / ปริมาณ: ${template.volume} / ต่อไร่: ${template.usagePerArea}`}</span>
+                    <span style={{ marginLeft: 16 }}>
+                      {`ราคา: ${template.price} / ปริมาณ: ${template.volume} / ต่อไร่: ${template.usagePerArea}`}
+                    </span>
+                    <CloseOutlined
+                      style={{
+                        color: 'red',
+                        marginLeft: 8,
+                        cursor: 'pointer'
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleDeleteTemplate(index)
+                      }}
+                    />
                   </div>
                 )
               }))
@@ -739,7 +803,6 @@ const FertilizerManager: React.FC = () => {
             }
           }}
         />
-
         <label>ปริมาณทั้งหมด (ซีซี):</label>
         <InputNumber
           placeholder="ปริมาณทั้งหมด (ซีซี)"
@@ -785,7 +848,6 @@ const FertilizerManager: React.FC = () => {
             }
           }}
         />
-
         <Button
           type="primary"
           onClick={saveFertilizerTemplate}
@@ -794,6 +856,41 @@ const FertilizerManager: React.FC = () => {
         >
           Save Template
         </Button>
+      </Modal>
+
+      <Modal
+        title="ข้อมูลปุ๋ย"
+        open={isPopupVisible}
+        onCancel={closePopup}
+        footer={null}
+      >
+        {popupContent && (
+          <div>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'center',
+                marginBottom: '16px'
+              }}
+            >
+              <Image
+                src={FertilizerImage[popupContent as FertilizerType]}
+                alt={popupContent}
+                width={250}
+                preview={false}
+              />
+            </div>
+            <p>
+              <strong>ชื่อปุ๋ย:</strong> {popupContent}
+            </p>
+            {FertilizerDescribe[popupContent as FertilizerType] && (
+              <p>
+                <strong>คำอธิบาย:</strong>{' '}
+                {FertilizerDescribe[popupContent as FertilizerType]}
+              </p>
+            )}
+          </div>
+        )}
       </Modal>
     </Content>
   )
