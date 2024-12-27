@@ -158,6 +158,7 @@ const FertilizerManager: React.FC = () => {
 
     const newFertilizer: FertilizerUsage = {
       fertilizer: selectedFertilizer ?? '',
+      totalAmount,
       amountPerUse,
       price: totalPrice,
       pricePerCC,
@@ -257,7 +258,7 @@ const FertilizerManager: React.FC = () => {
       }
     },
     { title: 'ราคา (บาท)', dataIndex: 'price', key: 'price' },
-    { title: 'ปริมาณ (ซีซี)', dataIndex: 'amountPerUse', key: 'amountPerUse' },
+    { title: 'ปริมาณ (ซีซี)', dataIndex: 'totalAmount', key: 'totalAmount' },
     {
       title: 'จำนวนครั้ง',
       key: 'frequency',
@@ -663,64 +664,7 @@ const FertilizerManager: React.FC = () => {
       >
         <h3>เพิ่มปุ๋ย</h3>
         <label>ชื่อปุ๋ย:</label>
-        {/* <AutoComplete
-          style={{ width: '100%', marginBottom: '16px' }}
-          options={[
-            {
-              label: 'Nutriplant Fertilizers',
-              options: Object.values(FertilizerType).map((key) => ({
-                value: key,
-                label: (
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <img
-                      src={FertilizerImage[key]}
-                      alt={key}
-                      style={{ width: 40, height: 40, marginRight: 10 }}
-                    />
-                    <span>{key}</span>
-                  </div>
-                )
-              }))
-            },
-            {
-              label: 'Templates',
-              options: fertilizerTemplates.map((template, index) => ({
-                value: `${template.name}_${index}`,
-                label: (
-                  <div
-                    style={{ display: 'flex', justifyContent: 'space-between' }}
-                  >
-                    <span>{template.name}</span>
-                    <span>{`ราคา: ${template.price} / ปริมาณ: ${template.volume} / ต่อไร่: ${template.usagePerArea}`}</span>
-                  </div>
-                )
-              }))
-            }
-          ]}
-          placeholder="เลือกปุ๋ยหรือเพิ่มปุ๋ยใหม่"
-          value={selectedFertilizer || ''}
-          onChange={(value) => setSelectedFertilizer(value.split('_')[0])}
-          onSelect={(value) => {
-            const selectedNutriplant = Object.values(FertilizerType).find(
-              (type) => type === value
-            )
-            if (selectedNutriplant) {
-              setSelectedFertilizer(selectedNutriplant)
-              setTotalPrice(FertilizerPrices[selectedNutriplant])
-              setTotalAmount(FertilizerVolume[selectedNutriplant])
-              setAmountPerUse(0)
-            } else {
-              const [, index] = value.split('-')
-              const template = fertilizerTemplates[parseInt(index, 10)]
-              if (template) {
-                setSelectedFertilizer(template.name)
-                setTotalAmount(template.volume)
-                setAmountPerUse(template.usagePerArea)
-                setTotalPrice(template.price)
-              }
-            }
-          }}
-        /> */}
+
         <AutoComplete
           style={{ width: '100%', marginBottom: '16px' }}
           options={[

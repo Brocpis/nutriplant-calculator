@@ -3,6 +3,7 @@ import dayjs from 'dayjs'
 
 export interface FertilizerUsage {
   fertilizer: string
+  totalAmount: number
   amountPerUse: number
   price: number
   pricePerCC: number
