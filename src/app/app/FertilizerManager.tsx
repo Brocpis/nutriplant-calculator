@@ -19,7 +19,8 @@ import {
 import {
   PlusOutlined,
   DeleteOutlined,
-  DownloadOutlined
+  DownloadOutlined,
+  EditOutlined
 } from '@ant-design/icons'
 import * as XLSX from 'xlsx'
 import dayjs, { Dayjs } from 'dayjs'
@@ -39,6 +40,7 @@ const FertilizerManager: React.FC = () => {
   const [periods, setPeriods] = useState<Period[]>([])
   const [isPeriodModalVisible, setIsPeriodModalVisible] = useState(false)
   const [currentPeriod, setCurrentPeriod] = useState<Period | null>(null)
+  const [isEditingPeriod, setIsEditingPeriod] = useState(false)
 
   const [periodName, setPeriodName] = useState('')
   const [startDate, setStartDate] = useState('')
@@ -54,6 +56,10 @@ const FertilizerManager: React.FC = () => {
   const [totalPrice, setTotalPrice] = useState<number>(0)
   const [isFertilizerModalVisible, setIsFertilizerModalVisible] =
     useState(false)
+  const [isEditingFertilizer, setIsEditingFertilizer] = useState(false)
+  const [editingFertilizerIndex, setEditingFertilizerIndex] = useState<
+    number | null
+  >(null)
 
   const isPeriodFormValid = () => {
     return periodName && startDate && endDate && interval
@@ -81,7 +87,16 @@ const FertilizerManager: React.FC = () => {
       frequency: calculatedFrequency,
       fertilizers: []
     }
-    setPeriods((prev) => [...prev, newPeriod])
+
+    if (isEditingPeriod && currentPeriod) {
+      setPeriods((prev) =>
+        prev.map((p) =>
+          p.id === currentPeriod.id ? { ...newPeriod, id: p.id } : p
+        )
+      )
+    } else {
+      setPeriods((prev) => [...prev, newPeriod])
+    }
     resetPeriodModal()
   }
 
@@ -92,6 +107,23 @@ const FertilizerManager: React.FC = () => {
     setInterval('')
     setFrequency(1)
     setIsPeriodModalVisible(false)
+    setIsEditingPeriod(false)
+    setCurrentPeriod(null)
+  }
+
+  const deletePeriod = (periodId: number) => {
+    setPeriods((prev) => prev.filter((p) => p.id !== periodId))
+  }
+
+  const editPeriod = (period: Period) => {
+    setIsEditingPeriod(true)
+    setCurrentPeriod(period)
+    setPeriodName(period.name)
+    setStartDate(period.startDate)
+    setEndDate(period.endDate)
+    setInterval(period.interval)
+    setFrequency(period.frequency)
+    setIsPeriodModalVisible(true)
   }
 
   const addFertilizerToPeriod = () => {
@@ -115,11 +147,19 @@ const FertilizerManager: React.FC = () => {
     }
 
     setPeriods((prev) =>
-      prev.map((p) =>
-        p.id === currentPeriod.id
-          ? { ...p, fertilizers: [...p.fertilizers, newFertilizer] }
-          : p
-      )
+      prev.map((p) => {
+        if (p.id === currentPeriod.id) {
+          const fertilizers =
+            isEditingFertilizer && editingFertilizerIndex !== null
+              ? p.fertilizers.map((f, idx) =>
+                  idx === editingFertilizerIndex ? newFertilizer : f
+                )
+              : [...p.fertilizers, newFertilizer]
+
+          return { ...p, fertilizers }
+        }
+        return p
+      })
     )
     resetFertilizerModal()
   }
@@ -130,6 +170,20 @@ const FertilizerManager: React.FC = () => {
     setTotalAmount(0)
     setTotalPrice(0)
     setIsFertilizerModalVisible(false)
+    setIsEditingFertilizer(false)
+    setEditingFertilizerIndex(null)
+  }
+
+  const editFertilizer = (period: Period, index: number) => {
+    const fertilizer = period.fertilizers[index]
+    setIsEditingFertilizer(true)
+    setEditingFertilizerIndex(index)
+    setSelectedFertilizer(fertilizer.fertilizer)
+    setAmountPerUse(fertilizer.amountPerUse)
+    setTotalAmount(fertilizer.usableArea * fertilizer.amountPerUse)
+    setTotalPrice(fertilizer.price)
+    setCurrentPeriod(period)
+    setIsFertilizerModalVisible(true)
   }
 
   const deleteFertilizer = (periodId: number, fertilizerIndex: number) => {
@@ -197,15 +251,23 @@ const FertilizerManager: React.FC = () => {
       ),
       key: 'action',
       render: (_: any, record: FertilizerUsage, index: number) => (
-        <Button
-          type="link"
-          danger
-          icon={<DeleteOutlined />}
-          onClick={() => deleteFertilizer(period.id, index)}
-        />
+        <Space>
+          <Button
+            type="link"
+            icon={<EditOutlined />}
+            onClick={() => editFertilizer(period, index)}
+          />
+          <Button
+            type="link"
+            danger
+            icon={<DeleteOutlined />}
+            onClick={() => deleteFertilizer(period.id, index)}
+          />
+        </Space>
       )
     }
   ]
+
   const disabledDate = (current: Dayjs) => {
     if (!current) return false
     const today = dayjs().startOf('day')
@@ -298,6 +360,23 @@ const FertilizerManager: React.FC = () => {
               {period.name} ({dayjs(period.startDate).format('DD/MM/YYYY')} -{' '}
               {dayjs(period.endDate).format('DD/MM/YYYY')}) [{period.interval}]
             </h3>
+            <Space style={{ marginBottom: '8px' }}>
+              <Button
+                type="link"
+                icon={<EditOutlined />}
+                onClick={() => editPeriod(period)}
+              >
+                แก้ไขช่วง
+              </Button>
+              <Button
+                type="link"
+                danger
+                icon={<DeleteOutlined />}
+                onClick={() => deletePeriod(period.id)}
+              >
+                ลบช่วง
+              </Button>
+            </Space>
             <Table
               columns={periodColumns(period)}
               dataSource={period.fertilizers}
