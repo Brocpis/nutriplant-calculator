@@ -1,4 +1,3 @@
-// ...
 'use client'
 import React, { useState } from 'react'
 import {
@@ -13,57 +12,28 @@ import {
   Input,
   Divider,
   Card,
-  Layout
+  Layout,
+  Space,
+  Descriptions
 } from 'antd'
-import { PlusOutlined, DeleteOutlined } from '@ant-design/icons'
+import {
+  PlusOutlined,
+  DeleteOutlined,
+  DownloadOutlined
+} from '@ant-design/icons'
+import * as XLSX from 'xlsx'
 import dayjs, { Dayjs } from 'dayjs'
 import isBetween from 'dayjs/plugin/isBetween'
+import {
+  calculateFrequency,
+  totalCostPerPeriod,
+  Period,
+  FertilizerUsage
+} from './fertilizerUtils'
 
 dayjs.extend(isBetween)
 
 const { Content } = Layout
-
-interface FertilizerUsage {
-  fertilizer: string
-  amountPerUse: number
-  price: number
-  pricePerCC: number
-  pricePerUsePerArea: number
-  usableArea: number
-  totalUsage: number
-  totalCost: number
-}
-
-interface Period {
-  id: number
-  name: string
-  startDate: string
-  endDate: string
-  interval: string
-  frequency: number
-  fertilizers: FertilizerUsage[]
-}
-
-const calculateFrequency = (
-  interval: string,
-  startDate: string,
-  endDate: string
-) => {
-  const start = dayjs(startDate)
-  const end = dayjs(endDate)
-  const diffInDays = end.diff(start, 'day') + 1
-
-  switch (interval) {
-    case '1 สัปดาห์':
-      return Math.floor(diffInDays / 7)
-    case '2 สัปดาห์':
-      return Math.floor(diffInDays / 14)
-    case '1 เดือน':
-      return Math.floor(diffInDays / 30)
-    default:
-      return 1
-  }
-}
 
 const FertilizerManager: React.FC = () => {
   const [periods, setPeriods] = useState<Period[]>([])
@@ -236,10 +206,6 @@ const FertilizerManager: React.FC = () => {
       )
     }
   ]
-
-  const totalCostPerPeriod = (fertilizers: FertilizerUsage[]) =>
-    fertilizers.reduce((sum, f) => sum + f.totalCost, 0)
-
   const disabledDate = (current: Dayjs) => {
     if (!current) return false
     const today = dayjs().startOf('day')
@@ -255,6 +221,47 @@ const FertilizerManager: React.FC = () => {
     )
   }
 
+  const exportToExcel = () => {
+    const combinedData = periods.flatMap((period) =>
+      period.fertilizers.map((fertilizer) => ({
+        ชื่อช่วง: period.name,
+        วันที่เริ่มต้น: dayjs(period.startDate).format('DD/MM/YYYY'),
+        วันที่สิ้นสุด: dayjs(period.endDate).format('DD/MM/YYYY'),
+        ความถี่ในการใช้: period.interval,
+        จำนวนครั้ง: period.frequency,
+        ชื่อปุ๋ย: fertilizer.fertilizer,
+        'ปริมาณต่อครั้ง (ซีซี)': fertilizer.amountPerUse,
+        'ราคา (บาททั้งหมด)': fertilizer.price,
+        'ราคา/ปริมาณ (บาท/ซีซี)': fertilizer.pricePerCC.toFixed(2),
+        'ราคา/ไร่ (บาท)': fertilizer.pricePerUsePerArea.toFixed(2),
+        'ปริมาณการใช้รวม (ซีซี)': fertilizer.totalUsage,
+        'ราคารวม (บาท)': fertilizer.totalCost.toFixed(2)
+      }))
+    )
+
+    const summaryData = Object.entries(
+      periods.reduce((summary, period) => {
+        period.fertilizers.forEach((fertilizer) => {
+          summary[fertilizer.fertilizer] =
+            (summary[fertilizer.fertilizer] || 0) + fertilizer.totalUsage
+        })
+        return summary
+      }, {} as Record<string, number>)
+    ).map(([fertilizer, total]) => ({
+      ชื่อปุ๋ย: fertilizer,
+      'ปริมาณการใช้รวม (ซีซี)': total.toLocaleString()
+    }))
+
+    const workbook = XLSX.utils.book_new()
+
+    const worksheet = XLSX.utils.json_to_sheet(combinedData)
+    XLSX.utils.book_append_sheet(workbook, worksheet, 'ข้อมูลปุ๋ยทุกช่วง')
+    const summaryWorksheet = XLSX.utils.json_to_sheet(summaryData)
+    XLSX.utils.book_append_sheet(workbook, summaryWorksheet, 'สรุปปุ๋ย')
+
+    XLSX.writeFile(workbook, 'สรุปข้อมูลปุ๋ย.xlsx')
+  }
+
   return (
     <Content style={{ padding: '24px 50px' }}>
       <Card>
@@ -266,13 +273,24 @@ const FertilizerManager: React.FC = () => {
           }}
         >
           <h2>การใช้ปุ๋ยตามช่วง</h2>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => setIsPeriodModalVisible(true)}
-          >
-            เพิ่มช่วง
-          </Button>
+          <div>
+            <Space>
+              <Button
+                type="default"
+                icon={<DownloadOutlined />}
+                onClick={exportToExcel}
+              >
+                Export to Excel
+              </Button>
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={() => setIsPeriodModalVisible(true)}
+              >
+                เพิ่มช่วง
+              </Button>
+            </Space>
+          </div>
         </div>
         {periods.map((period) => (
           <div key={period.id} style={{ marginBottom: '16px' }}>
@@ -294,20 +312,61 @@ const FertilizerManager: React.FC = () => {
         ))}
       </Card>
       <Divider />
-      <h4>
-        ราคารวมทั้งหมด:{' '}
-        {periods
-          .reduce(
-            (total, period) => total + totalCostPerPeriod(period.fertilizers),
-            0
-          )
-          .toLocaleString()}{' '}
-        บาท
-      </h4>
-      <h4>
-        จำนวนครั้งในการฉีดทั้งหมด:{' '}
-        {periods.reduce((total, period) => total + period.frequency, 0)} ครั้ง
-      </h4>
+      <Card
+        title="สรุปข้อมูลการใช้ปุ๋ย"
+        bordered={false}
+        style={{ marginTop: 24 }}
+      >
+        <Descriptions bordered column={1}>
+          <Descriptions.Item label="ราคารวมทั้งหมด">
+            {periods
+              .reduce(
+                (total, period) =>
+                  total + totalCostPerPeriod(period.fertilizers),
+                0
+              )
+              .toLocaleString()}{' '}
+            บาท
+          </Descriptions.Item>
+          <Descriptions.Item label="จำนวนครั้งในการฉีดทั้งหมด">
+            {periods.reduce((total, period) => total + period.frequency, 0)}{' '}
+            ครั้ง
+          </Descriptions.Item>
+          <Descriptions.Item label="จำนวนปุ๋ยที่ใช้แต่ละตัว">
+            <Table
+              dataSource={Object.entries(
+                periods.reduce((summary, period) => {
+                  period.fertilizers.forEach((fertilizer) => {
+                    summary[fertilizer.fertilizer] =
+                      (summary[fertilizer.fertilizer] || 0) +
+                      fertilizer.totalUsage
+                  })
+                  return summary
+                }, {} as Record<string, number>)
+              ).map(([fertilizer, total]) => ({
+                key: fertilizer,
+                fertilizer,
+                total
+              }))}
+              columns={[
+                {
+                  title: 'ชื่อปุ๋ย',
+                  dataIndex: 'fertilizer',
+                  key: 'fertilizer'
+                },
+                {
+                  title: 'ปริมาณรวม (ซีซี)',
+                  dataIndex: 'total',
+                  key: 'total',
+                  render: (value) => value.toLocaleString()
+                }
+              ]}
+              pagination={false}
+              size="small"
+            />
+          </Descriptions.Item>
+        </Descriptions>
+      </Card>
 
       {/* Period Modal */}
       <Modal

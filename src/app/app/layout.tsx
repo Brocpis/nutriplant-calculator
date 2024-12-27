@@ -4,7 +4,15 @@ import React, { useState, useEffect } from 'react'
 import { DesktopOutlined, ContactsOutlined } from '@ant-design/icons'
 import type { MenuProps } from 'antd'
 import { ConfigProvider, Layout, Menu } from 'antd'
-import Image from 'next/image' // Import Image from next/image
+import Image from 'next/image'
+import { Kanit } from 'next/font/google'
+import '../globals.css'
+
+const kanit_init = Kanit({
+  subsets: ['latin'],
+  weight: ['100', '300', '500'],
+  variable: '--font-kanit'
+})
 
 const { Header, Content, Footer, Sider } = Layout
 
@@ -49,7 +57,7 @@ export default function RootLayout({
 
   return (
     <html lang="en">
-      <body>
+      <body className={kanit_init.variable}>
         <ConfigProvider
           theme={{
             token: {
