@@ -31,6 +31,12 @@ import {
   Period,
   FertilizerUsage
 } from './fertilizerUtils'
+import {
+  FertilizerImage,
+  FertilizerPrices,
+  FertilizerType,
+  FertilizerVolume
+} from '../enums'
 
 dayjs.extend(isBetween)
 
@@ -174,6 +180,10 @@ const FertilizerManager: React.FC = () => {
     setEditingFertilizerIndex(null)
   }
 
+  const [marketFertilizers, setMarketFertilizers] = useState<
+    { name: string; price: number; volume: number }[]
+  >([])
+
   const editFertilizer = (period: Period, index: number) => {
     const fertilizer = period.fertilizers[index]
     setIsEditingFertilizer(true)
@@ -269,17 +279,34 @@ const FertilizerManager: React.FC = () => {
   ]
 
   const disabledDate = (current: Dayjs) => {
-    if (!current) return false
     const today = dayjs().startOf('day')
-    if (current.isBefore(today)) return true
+    return current && current.isBefore(today) // Disable dates before today
+  }
 
-    return periods.some((period) =>
+  const renderDateCell = (current: string | number | Dayjs) => {
+    if (!dayjs.isDayjs(current)) return current // Return unmodified if not Dayjs
+
+    const isMarked = periods.some((period) =>
       current.isBetween(
         dayjs(period.startDate),
         dayjs(period.endDate),
         null,
-        '[)'
+        '[]'
       )
+    )
+
+    return (
+      <div
+        style={{
+          backgroundColor: isMarked ? '#f5f5f5' : undefined,
+          border: isMarked ? '1px solid #00b96b' : undefined,
+          borderRadius: '4px',
+          padding: '4px',
+          textAlign: 'center'
+        }}
+      >
+        {current.date()}
+      </div>
     )
   }
 
@@ -324,6 +351,36 @@ const FertilizerManager: React.FC = () => {
     XLSX.writeFile(workbook, 'สรุปข้อมูลปุ๋ย.xlsx')
   }
 
+  const [fertilizerTemplates, setFertilizerTemplates] = useState<
+    { name: string; volume: number; usagePerArea: number; price: number }[]
+  >([])
+
+  const saveFertilizerTemplate = () => {
+    if (
+      !selectedFertilizer ||
+      totalAmount <= 0 ||
+      amountPerUse <= 0 ||
+      totalPrice <= 0
+    )
+      return
+
+    const exists = fertilizerTemplates.find(
+      (template) => template.name === selectedFertilizer
+    )
+
+    if (!exists) {
+      const newTemplate = {
+        name: selectedFertilizer,
+        volume: totalAmount,
+        usagePerArea: amountPerUse,
+        price: totalPrice
+      }
+      setFertilizerTemplates((prev) => [...prev, newTemplate])
+    }
+
+    resetFertilizerModal()
+  }
+
   return (
     <Content style={{ padding: '24px 50px' }}>
       <Card>
@@ -360,23 +417,31 @@ const FertilizerManager: React.FC = () => {
               {period.name} ({dayjs(period.startDate).format('DD/MM/YYYY')} -{' '}
               {dayjs(period.endDate).format('DD/MM/YYYY')}) [{period.interval}]
             </h3>
-            <Space style={{ marginBottom: '8px' }}>
-              <Button
-                type="link"
-                icon={<EditOutlined />}
-                onClick={() => editPeriod(period)}
-              >
-                แก้ไขช่วง
-              </Button>
-              <Button
-                type="link"
-                danger
-                icon={<DeleteOutlined />}
-                onClick={() => deletePeriod(period.id)}
-              >
-                ลบช่วง
-              </Button>
-            </Space>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                marginBottom: '8px'
+              }}
+            >
+              <Space>
+                <Button
+                  type="link"
+                  icon={<EditOutlined />}
+                  onClick={() => editPeriod(period)}
+                >
+                  แก้ไขช่วง
+                </Button>
+                <Button
+                  type="link"
+                  danger
+                  icon={<DeleteOutlined />}
+                  onClick={() => deletePeriod(period.id)}
+                >
+                  ลบช่วง
+                </Button>
+              </Space>
+            </div>
             <Table
               columns={periodColumns(period)}
               dataSource={period.fertilizers}
@@ -472,6 +537,7 @@ const FertilizerManager: React.FC = () => {
               placeholder="วันที่เริ่มต้น"
               style={{ width: '100%' }}
               format={'DD-MM-YYYY'}
+              defaultPickerValue={startDate ? dayjs(startDate) : undefined}
               onChange={(date) => {
                 const newStartDate = date ? date.format('YYYY-MM-DD') : ''
                 setStartDate(newStartDate)
@@ -483,6 +549,7 @@ const FertilizerManager: React.FC = () => {
                 setFrequency(updatedFrequency)
               }}
               disabledDate={disabledDate}
+              cellRender={renderDateCell}
             />
           </Col>
           <Col span={12}>
@@ -490,6 +557,7 @@ const FertilizerManager: React.FC = () => {
             <DatePicker
               placeholder="วันที่สิ้นสุด"
               style={{ width: '100%' }}
+              defaultPickerValue={endDate ? dayjs(endDate) : undefined}
               format={'DD-MM-YYYY'}
               onChange={(date) => {
                 const newEndDate = date ? date.format('YYYY-MM-DD') : ''
@@ -502,6 +570,7 @@ const FertilizerManager: React.FC = () => {
                 setFrequency(updatedFrequency)
               }}
               disabledDate={disabledDate}
+              cellRender={renderDateCell}
             />
           </Col>
         </Row>
@@ -535,6 +604,7 @@ const FertilizerManager: React.FC = () => {
       </Modal>
 
       {/* Fertilizer Modal */}
+
       <Modal
         open={isFertilizerModalVisible}
         onCancel={resetFertilizerModal}
@@ -546,20 +616,130 @@ const FertilizerManager: React.FC = () => {
       >
         <h3>เพิ่มปุ๋ย</h3>
         <label>ชื่อปุ๋ย:</label>
+        {/* <AutoComplete
+          style={{ width: '100%', marginBottom: '16px' }}
+          options={[
+            {
+              label: 'Nutriplant Fertilizers',
+              options: Object.values(FertilizerType).map((key) => ({
+                value: key,
+                label: (
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <img
+                      src={FertilizerImage[key]}
+                      alt={key}
+                      style={{ width: 40, height: 40, marginRight: 10 }}
+                    />
+                    <span>{key}</span>
+                  </div>
+                )
+              }))
+            },
+            {
+              label: 'Templates',
+              options: fertilizerTemplates.map((template, index) => ({
+                value: `${template.name}_${index}`,
+                label: (
+                  <div
+                    style={{ display: 'flex', justifyContent: 'space-between' }}
+                  >
+                    <span>{template.name}</span>
+                    <span>{`ราคา: ${template.price} / ปริมาณ: ${template.volume} / ต่อไร่: ${template.usagePerArea}`}</span>
+                  </div>
+                )
+              }))
+            }
+          ]}
+          placeholder="เลือกปุ๋ยหรือเพิ่มปุ๋ยใหม่"
+          value={selectedFertilizer || ''}
+          onChange={(value) => setSelectedFertilizer(value.split('_')[0])}
+          onSelect={(value) => {
+            const selectedNutriplant = Object.values(FertilizerType).find(
+              (type) => type === value
+            )
+            if (selectedNutriplant) {
+              setSelectedFertilizer(selectedNutriplant)
+              setTotalPrice(FertilizerPrices[selectedNutriplant])
+              setTotalAmount(FertilizerVolume[selectedNutriplant])
+              setAmountPerUse(0)
+            } else {
+              const [, index] = value.split('-')
+              const template = fertilizerTemplates[parseInt(index, 10)]
+              if (template) {
+                setSelectedFertilizer(template.name)
+                setTotalAmount(template.volume)
+                setAmountPerUse(template.usagePerArea)
+                setTotalPrice(template.price)
+              }
+            }
+          }}
+        /> */}
         <AutoComplete
           style={{ width: '100%', marginBottom: '16px' }}
           options={[
-            { value: 'ปุ๋ยทางดินธาตุอาหารหลัก', key: '1' },
-            { value: 'ปุ๋ยทางใบธาตุอาหารหลัก', key: '2' },
-            { value: 'ปุ๋ยทางดินธาตุอาหารรอง', key: '3' },
-            { value: 'ปุ๋ยทางใบธาตุอาหารรอง', key: '4' },
-            { value: 'ฮอร์โมน', key: '5' },
-            { value: 'ยาฆ่าแมลง', key: '5' }
+            {
+              label: 'Nutriplant Fertilizers',
+              options: Object.values(FertilizerType).map((key) => ({
+                value: `nutriplant:${key}`,
+                label: (
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <img
+                      src={FertilizerImage[key]}
+                      alt={key}
+                      style={{ width: 40, height: 40, marginRight: 10 }}
+                    />
+                    <span>{key}</span>
+                  </div>
+                )
+              }))
+            },
+            {
+              label: 'Templates',
+              options: fertilizerTemplates.map((template, index) => ({
+                value: `template:${template.name}_${index}`,
+                label: (
+                  <div
+                    style={{ display: 'flex', justifyContent: 'space-between' }}
+                  >
+                    <span>{template.name}</span>
+                    <span>{`ราคา: ${template.price} / ปริมาณ: ${template.volume} / ต่อไร่: ${template.usagePerArea}`}</span>
+                  </div>
+                )
+              }))
+            }
           ]}
-          placeholder="ชื่อปุ๋ย"
+          placeholder="เลือกปุ๋ยหรือเพิ่มปุ๋ยใหม่"
           value={selectedFertilizer || ''}
-          onChange={(value) => setSelectedFertilizer(value)}
+          onChange={(value) => {
+            setSelectedFertilizer(value) // อนุญาตให้พิมพ์ได้
+          }}
+          onSelect={(value) => {
+            const [type, detail] = value.split(':') // แยกประเภทและรายละเอียด
+            if (type === 'nutriplant') {
+              if (
+                Object.values(FertilizerType).includes(detail as FertilizerType)
+              ) {
+                const selectedNutriplant = detail as FertilizerType
+                setSelectedFertilizer(selectedNutriplant)
+                setTotalPrice(FertilizerPrices[selectedNutriplant])
+                setTotalAmount(FertilizerVolume[selectedNutriplant])
+                setAmountPerUse(0)
+              }
+            } else if (type === 'template') {
+              // หากเป็น Template
+              const [, indexStr] = detail.split('_')
+              const index = parseInt(indexStr, 10)
+              const template = fertilizerTemplates[index]
+              if (template) {
+                setSelectedFertilizer(template.name)
+                setTotalAmount(template.volume)
+                setAmountPerUse(template.usagePerArea)
+                setTotalPrice(template.price)
+              }
+            }
+          }}
         />
+
         <label>ปริมาณทั้งหมด (ซีซี):</label>
         <InputNumber
           placeholder="ปริมาณทั้งหมด (ซีซี)"
@@ -567,6 +747,15 @@ const FertilizerManager: React.FC = () => {
           value={totalAmount}
           onChange={(value) => {
             if (typeof value === 'number') setTotalAmount(value)
+            if (marketFertilizers.find((f) => f.name === selectedFertilizer)) {
+              setMarketFertilizers((prev) =>
+                prev.map((f) =>
+                  f.name === selectedFertilizer
+                    ? { ...f, volume: value || 0 }
+                    : f
+                )
+              )
+            }
           }}
         />
         <label>ปริมาณการใช้ต่อไร่ (ซีซี):</label>
@@ -585,8 +774,26 @@ const FertilizerManager: React.FC = () => {
           value={totalPrice}
           onChange={(value) => {
             if (typeof value === 'number') setTotalPrice(value)
+            if (marketFertilizers.find((f) => f.name === selectedFertilizer)) {
+              setMarketFertilizers((prev) =>
+                prev.map((f) =>
+                  f.name === selectedFertilizer
+                    ? { ...f, price: value || 0 }
+                    : f
+                )
+              )
+            }
           }}
         />
+
+        <Button
+          type="primary"
+          onClick={saveFertilizerTemplate}
+          disabled={!isFertilizerFormValid()}
+          style={{ marginTop: '16px' }}
+        >
+          Save Template
+        </Button>
       </Modal>
     </Content>
   )

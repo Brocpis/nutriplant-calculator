@@ -41,6 +41,17 @@ export const FertilizerPrices: Record<FertilizerType, number> = {
   [FertilizerType.SOIL_PLUS]: 1291
 }
 
+export const FertilizerVolume: Record<FertilizerType, number> = {
+  [FertilizerType.APSA_80]: 1000,
+  [FertilizerType.NITROGEN_PLUS]: 1000,
+  [FertilizerType.NPK_PLUS]: 1000,
+  [FertilizerType.POTASSIUM_PLUS]: 1000,
+  [FertilizerType.AG]: 1000,
+  [FertilizerType.CALCIUM_BORON]: 1000,
+  [FertilizerType.ZINC_PLUS]: 1000,
+  [FertilizerType.SOIL_PLUS]: 1000
+}
+
 export const FertilizerImage: Record<FertilizerType, string> = {
   [FertilizerType.APSA_80]: '/product/apsa.jpg',
   [FertilizerType.NITROGEN_PLUS]: '/product/n.jpg',
