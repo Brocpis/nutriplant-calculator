@@ -9,6 +9,7 @@ const client = new MongoClient(uri)
 export async function GET() {
   try {
     console.log('uri:', uri)
+    console.log('die0')
     await client.connect()
     const db = client.db('fertilizer')
     console.log('die1')
