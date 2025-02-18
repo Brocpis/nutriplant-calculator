@@ -11,8 +11,9 @@ export async function GET() {
     console.log('uri:', uri)
     console.log('die0')
     await client.connect()
-    const db = client.db('fertilizer')
     console.log('die1')
+    const db = client.db('fertilizer')
+    console.log('die2')
     const data = await db
       .collection('schedules')
       .find({}, { projection: { _id: 1, name: 1 } }) // Include `_id` for delete
