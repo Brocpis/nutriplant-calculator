@@ -11,12 +11,12 @@ export async function GET() {
     console.log('uri:', uri)
     await client.connect()
     const db = client.db('fertilizer')
-
+    console.log('die1')
     const data = await db
       .collection('schedules')
       .find({}, { projection: { _id: 1, name: 1 } }) // Include `_id` for delete
       .toArray()
-
+    console.log('die2', data)
     return NextResponse.json(data, { status: 200 })
   } catch (error) {
     console.error('Error fetching data:', error)
